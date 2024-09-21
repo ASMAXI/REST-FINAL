@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_security.demo.dao;
 
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
@@ -49,5 +48,14 @@ public class UserDaoImpl implements UserDao {
         if (user != null) {
             entityManager.remove(user);
         }
+    }
+
+    @Override
+    public Optional<User> getUserByName(String name) {
+        return entityManager.createQuery("SELECT u FROM User u WHERE u.name = :name", User.class)
+                .setParameter("name", name)
+                .getResultList()
+                .stream()
+                .findFirst();
     }
 }
