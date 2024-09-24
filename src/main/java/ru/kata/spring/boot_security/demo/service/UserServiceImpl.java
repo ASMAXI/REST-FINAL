@@ -25,7 +25,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDao userDao;
 
-
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -40,18 +39,17 @@ public class UserServiceImpl implements UserService {
         return userDao.createUser(user);
     }
 
-
     @Override
     @Transactional
     public User updateUser(Long id, User userDetails) {
         User user = userDao.getUserById(id).orElseThrow(() -> new RuntimeException("User not found"));
         user.setName(userDetails.getName());
         user.setEmail(userDetails.getEmail());
-
-
+        user.setRoles(userDetails.getRoles());
         if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
         }
+        logger.info("Updating user with id: {}", id);
         return userDao.updateUser(id, user);
     }
 
@@ -76,4 +74,3 @@ public class UserServiceImpl implements UserService {
         userDao.deleteUser(id);
     }
 }
-
