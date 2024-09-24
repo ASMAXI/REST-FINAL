@@ -4,23 +4,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.service.StringToRoleSetConverter;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
+    @Autowired
+    StringToRoleSetConverter stringToRoleSetConverter;
 
     @Autowired
     private UserService userService;
@@ -43,14 +43,9 @@ public class AdminController {
     }
 
     @PostMapping("/add")
-    public String addUser(@ModelAttribute User user, @RequestParam(value = "roles", required = false) List<Long> roleIds) {
-        Set<Role> roles = new HashSet<>();
-        if (roleIds != null) {
-            roles = roleIds.stream()
-                    .map(roleService::getRoleById)
-                    .collect(Collectors.toSet());
-        }
-        user.setRoles(roles);
+    public String addUser(@ModelAttribute User user, @RequestParam(value = "roles", required = false) String roles) {
+        Set<Role> roleSet = stringToRoleSetConverter.convert(roles);
+        user.setRoles(roleSet);
         userService.createUser(user);
         return "redirect:/admin";
     }
@@ -66,12 +61,11 @@ public class AdminController {
             return "redirect:/admin"; // или другой обработчик ошибок
         }
     }
+
     @PostMapping("/edit/{id}")
-    public String editUser(@PathVariable Long id, @ModelAttribute User userDetails, @RequestParam(value = "roles", required = false) List<Long> roleIds) {
-        Set<Role> roles = roleIds.stream()
-                .map(roleService::getRoleById)
-                .collect(Collectors.toSet());
-        userDetails.setRoles(roles);
+    public String editUser(@PathVariable Long id, @ModelAttribute User userDetails, @RequestParam(value = "roles", required = false) String roles) {
+        Set<Role> roleSet = stringToRoleSetConverter.convert(roles);
+        userDetails.setRoles(roleSet);
         userService.updateUser(id, userDetails);
         return "redirect:/admin";
     }

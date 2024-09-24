@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
 import java.util.List;
@@ -14,23 +15,6 @@ public class UserDaoImpl implements UserDao {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    @Override
-    public List<User> getAllUsers() {
-        return entityManager.createQuery("SELECT u FROM User u", User.class).getResultList();
-    }
-
-    @Override
-    public Optional<User> getUserById(Long id) {
-        try {
-            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.id = :id", User.class)
-                    .setParameter("id", id)
-                    .getSingleResult();
-            return Optional.ofNullable(user);
-        } catch (NoResultException e) {
-            return Optional.empty();
-        }
-    }
 
     @Override
     public User createUser(User user) {
@@ -65,5 +49,32 @@ public class UserDaoImpl implements UserDao {
                 .getResultList()
                 .stream()
                 .findFirst();
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return entityManager.createQuery("SELECT u FROM User u", User.class).getResultList();
+    }
+
+    @Override
+    public Optional<User> getUserById(Long id) {
+        try {
+            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.id = :id", User.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+            return Optional.ofNullable(user);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public void addRoleToUser(Long userId, Long roleId) {
+        User user = entityManager.find(User.class, userId);
+        Role role = entityManager.find(Role.class, roleId);
+        if (user != null && role != null) {
+            user.getRoles().add(role);
+            entityManager.merge(user);
+        }
     }
 }
