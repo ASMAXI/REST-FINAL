@@ -58,7 +58,7 @@ public class AdminController {
             model.addAttribute("roles", roleService.getAllRoles());
             return "editUser";
         } else {
-            return "redirect:/admin"; // или другой обработчик ошибок
+            return "redirect:/admin";
         }
     }
 
