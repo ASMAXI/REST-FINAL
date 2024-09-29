@@ -27,6 +27,8 @@ public class UserDaoImpl implements UserDao {
         User user = entityManager.find(User.class, id);
         if (user != null) {
             user.setName(userDetails.getName());
+            user.setLast_name(userDetails.getLast_name());
+            user.setAge(userDetails.getAge());
             user.setEmail(userDetails.getEmail());
             user.setRoles(userDetails.getRoles());
             entityManager.merge(user);

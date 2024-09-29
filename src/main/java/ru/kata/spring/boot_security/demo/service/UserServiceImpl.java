@@ -52,6 +52,8 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id, User userDetails) {
         User user = userDao.getUserById(id).orElseThrow(() -> new RuntimeException("User not found"));
         user.setName(userDetails.getName());
+        user.setLast_name(userDetails.getLast_name());
+        user.setAge(userDetails.getAge());
         user.setEmail(userDetails.getEmail());
         user.setRoles(userDetails.getRoles());
         if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {

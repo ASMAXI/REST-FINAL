@@ -16,6 +16,8 @@ public class User implements UserDetails {
     private Long id;
 
     private String name;
+    private String last_name;
+    private int age;
     private String email;
     private String password;
 
@@ -39,6 +41,19 @@ public class User implements UserDetails {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLast_name() {
+        return last_name;
+    }
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
+    }
+    public int getAge() {
+        return age;
+    }
+    public void setAge(int age) {
+        this.age = age;
     }
 
     public String getEmail() {
@@ -102,12 +117,14 @@ public class User implements UserDetails {
         User user = (User) o;
         return Objects.equals(id, user.id) &&
                 Objects.equals(name, user.name) &&
+                Objects.equals(last_name, user.last_name) &&
+                Objects.equals(age, user.age) &&
                 Objects.equals(email, user.email) &&
                 Objects.equals(password, user.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, password);
+        return Objects.hash(id, name,last_name,age, email, password);
     }
 }
