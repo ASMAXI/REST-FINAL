@@ -73,7 +73,7 @@
                                     </td>
                                     <td>
                                         <a href="#" class="btn btn-warning edit-user" data-bs-toggle="modal" data-bs-target="#editUserModal" th:data-user-id="${user.id}">Edit</a>
-                                        <a th:href="@{/admin/delete/{id}(id=${user.id})}" class="btn btn-danger">Delete</a>
+                                        <a href="#" class="btn btn-danger delete-user" data-bs-toggle="modal" data-bs-target="#deleteUserInfoModal" th:data-user-id="${user.id}">Delete</a>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -125,16 +125,20 @@
         </div>
     </div>
 </div>
-<!-- Delete User Modal -->
-<div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+<!-- Delete User Info Modal -->
+<div class="modal fade" id="deleteUserInfoModal" tabindex="-1" role="dialog" aria-labelledby="deleteUserInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteUserModalLabel">Delete User</h5>
+                <h5 class="modal-title" id="deleteUserInfoModalLabel">Delete User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete <span id="deleteUserName"></span>?</p>
+                <p><strong>Name:</strong> <span id="deleteUserName"></span></p>
+                <p><strong>Last Name:</strong> <span id="deleteUserLastName"></span></p>
+                <p><strong>Age:</strong> <span id="deleteUserAge"></span></p>
+                <p><strong>Email:</strong> <span id="deleteUserEmail"></span></p>
+                <p><strong>Roles:</strong> <span id="deleteUserRoles"></span></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -188,26 +192,38 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        var token = $("meta[name='_csrf']").attr("content");
-        var header = $("meta[name='_csrf_header']").attr("content");
-// Обработчик для кнопки "Delete"
+        // Обработчик для кнопки "Delete"
         $('.delete-user').on('click', function() {
             var userId = $(this).data('user-id');
-            var userName = $(this).data('user-name');
-            $('#deleteUserName').text(userName);
-            $('#confirmDeleteUser').data('user-id', userId); // Передаем ID пользователя для удаления
-            $('#deleteUserModal').modal('show');
+
+            $.ajax({
+                url: '/admin/edit/' + userId,
+                method: 'GET',
+                success: function(response) {
+                    $('#deleteUserName').text(response.name);
+                    $('#deleteUserLastName').text(response.last_name);
+                    $('#deleteUserAge').text(response.age);
+                    $('#deleteUserEmail').text(response.email);
+                    var roles = response.roles.map(role => role.name).join(', ');
+                    $('#deleteUserRoles').text(roles);
+                    $('#confirmDeleteUser').data('user-id', response.id); // Передаем ID пользователя для удаления
+                    $('#deleteUserInfoModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching user data:', error);
+                }
+            });
         });
 
-// Обработчик для подтверждения удаления
+        // Обработчик для подтверждения удаления
         $('#confirmDeleteUser').on('click', function() {
             var userId = $(this).data('user-id');
 
             $.ajax({
                 url: '/admin/delete/' + userId,
-                method: 'DELETE',
+                method: 'GET',
                 success: function(response) {
-                    $('#deleteUserModal').modal('hide');
+                    $('#deleteUserInfoModal').modal('hide');
                     location.reload(); // Обновляем страницу после успешного удаления
                 },
                 error: function(xhr, status, error) {
@@ -215,6 +231,7 @@
                 }
             });
         });
+
         // Обработчик для формы добавления пользователя
         $('#addUserForm').on('submit', function(event) {
             event.preventDefault();

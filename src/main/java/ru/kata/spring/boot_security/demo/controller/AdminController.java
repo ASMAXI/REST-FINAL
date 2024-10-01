@@ -70,9 +70,9 @@ public class AdminController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    @GetMapping("/delete/{id}")
+    public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+        return "redirect:/admin";
     }
 }
