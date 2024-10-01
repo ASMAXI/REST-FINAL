@@ -80,7 +80,8 @@
                             </table>
                         </div>
                         <div class="tab-pane fade" id="addUser" role="tabpanel" aria-labelledby="addUser-tab">
-                            <form id="addUserForm">
+                            <form action="/admin/add" method="post">
+                                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
                                 <div class="form-group">
                                     <label for="name">Name</label>
                                     <input type="text" class="form-control" id="name" name="name" required>
@@ -107,7 +108,7 @@
                                         <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Add User</button>
+                                <button type="submit" class="btn btn-primary">Добавить нового пользователя</button>
                             </form>
                         </div>
                     </div>
@@ -278,7 +279,7 @@
 
                 $.ajax({
                     url: '/admin/edit/' + userId,
-                    method: 'PUT',
+                    method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
                     success: function(response) {

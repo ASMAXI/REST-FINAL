@@ -8,15 +8,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
+import ru.kata.spring.boot_security.demo.service.StringToRoleSetConverter;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
+    @Autowired
+    private StringToRoleSetConverter stringToRoleSetConverter;
 
     @Autowired
     private UserService userService;
@@ -46,9 +51,11 @@ public class AdminController {
 
 
     @PostMapping("/add")
-    public ResponseEntity<User> addUser(@RequestBody User user) {
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.ok(createdUser);
+    public String addUser(@ModelAttribute User user, @RequestParam(value = "roles", required = false) String roles) {
+        Set<Role> roleSet = stringToRoleSetConverter.convert(roles);
+        user.setRoles(roleSet);
+        userService.createUser(user);
+        return "redirect:/admin";
     }
 
     @GetMapping("/edit/{id}")
