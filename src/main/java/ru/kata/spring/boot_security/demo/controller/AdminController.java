@@ -31,14 +31,15 @@ public class AdminController {
 
     @GetMapping
     public String getAllUsers(Model model, Authentication authentication) {
+
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new AccessDeniedException("User is not authenticated");
         }
-
         User currentUser = (User) authentication.getPrincipal();
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("roles", roleService.getAllRoles());
+        model.addAttribute("user", new User());
         return "admin";
     }
     @GetMapping("/admin")
@@ -64,7 +65,7 @@ public class AdminController {
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/edit/{id}")
+    @PatchMapping("/edit/{id}")
     public ResponseEntity<User> editUser(@PathVariable Long id, @RequestBody User userDetails) {
         User updatedUser = userService.updateUser(id, userDetails);
         return ResponseEntity.ok(updatedUser);

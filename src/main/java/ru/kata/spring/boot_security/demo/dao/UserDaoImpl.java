@@ -8,8 +8,10 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public class UserDaoImpl implements UserDao {
@@ -31,7 +33,18 @@ public class UserDaoImpl implements UserDao {
             user.setLast_name(userDetails.getLast_name());
             user.setAge(userDetails.getAge());
             user.setEmail(userDetails.getEmail());
-            user.setRoles(userDetails.getRoles());
+
+            // Обновляем роли пользователя
+            Set<Role> rolesToSave = new HashSet<>();
+            for (Role role : userDetails.getRoles()) {
+                if (role.getId() == null) {
+                    // Если у роли нет ID, значит она новая и ее нужно сохранить
+                    entityManager.persist(role);
+                }
+                rolesToSave.add(role);
+            }
+            user.setRoles(rolesToSave);
+
             entityManager.merge(user);
         }
         return user;
@@ -41,6 +54,7 @@ public class UserDaoImpl implements UserDao {
     public void deleteUser(Long id) {
         User user = entityManager.find(User.class, id);
         if (user != null) {
+            user.getRoles().clear(); // Удаляем связи с ролями
             entityManager.remove(user);
         }
     }
@@ -76,8 +90,10 @@ public class UserDaoImpl implements UserDao {
         User user = entityManager.find(User.class, userId);
         Role role = entityManager.find(Role.class, roleId);
         if (user != null && role != null) {
-            user.getRoles().add(role);
-            entityManager.merge(user);
+            if (!user.getRoles().contains(role)) {
+                user.getRoles().add(role);
+                entityManager.merge(user);
+            }
         }
     }
 }

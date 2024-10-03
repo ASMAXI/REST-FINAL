@@ -23,4 +23,9 @@ public class RoleService {
     public Role getRoleById(Long id) {
         return roleDao.getRoleById(id);
     }
+
+    @Transactional
+    public Role findRoleByName(String name) {
+        return roleDao.findRoleByName(name);
+    }
 }

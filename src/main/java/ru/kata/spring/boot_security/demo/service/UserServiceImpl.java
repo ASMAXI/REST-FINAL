@@ -37,10 +37,25 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Password cannot be null or empty");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // Сохраняем роли, если они новые
+        Set<Role> rolesToSave = new HashSet<>();
+        for (Role role : user.getRoles()) {
+            Role existingRole = roleDao.findRoleByName(role.getName());
+            if (existingRole != null) {
+                // Если роль уже существует, используем ее
+                rolesToSave.add(existingRole);
+            } else {
+                // Если роли нет в базе данных, создаем новую
+                rolesToSave.add(roleDao.findRoleByName(role.getName()));
+            }
+        }
+        user.setRoles(rolesToSave);
+
         User createdUser = userDao.createUser(user);
 
         // Добавляем роли пользователю
-        for (Role role : user.getRoles()) {
+        for (Role role : rolesToSave) {
             userDao.addRoleToUser(createdUser.getId(), role.getId());
         }
 
@@ -55,7 +70,33 @@ public class UserServiceImpl implements UserService {
         user.setLast_name(userDetails.getLast_name());
         user.setAge(userDetails.getAge());
         user.setEmail(userDetails.getEmail());
-        user.setRoles(userDetails.getRoles());
+
+        // Обновляем роли пользователя
+        Set<Role> rolesToSave = new HashSet<>();
+
+        // Проверяем, есть ли роли в userDetails
+        if (userDetails.getRoles() == null || userDetails.getRoles().isEmpty()) {
+            // Если ролей нет, устанавливаем роль по умолчанию (например, ROLE_USER)
+            Role defaultRole = roleDao.findRoleByName("ROLE_USER");
+            if (defaultRole == null) {
+                throw new RuntimeException("Default role ROLE_USER not found");
+            }
+            rolesToSave.add(defaultRole);
+        } else {
+            for (Role role : userDetails.getRoles()) {
+                Role existingRole = roleDao.findRoleByName(role.getName());
+                if (existingRole != null) {
+                    // Если роль уже существует, используем ее
+                    rolesToSave.add(existingRole);
+                } else {
+                    // Если роли нет в базе данных, создаем новую
+                    rolesToSave.add(roleDao.findRoleByName(role.getName())); // Предполагаем, что есть метод saveRole
+                }
+            }
+        }
+
+        user.setRoles(rolesToSave);
+
         if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
         }
