@@ -12,7 +12,7 @@ import java.util.Set;
 public class StringToRoleSetConverter implements Converter<String, Set<Role>> {
 
     @Autowired
-    private RoleService roleService;
+    private RoleServiceImpl roleService;
 
     @Override
     public Set<Role> convert(String source) {
