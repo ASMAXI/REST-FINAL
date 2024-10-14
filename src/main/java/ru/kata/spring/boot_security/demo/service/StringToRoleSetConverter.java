@@ -12,7 +12,7 @@ import java.util.Set;
 public class StringToRoleSetConverter implements Converter<String, Set<Role>> {
 
     @Autowired
-    private RoleServiceImpl roleService;
+    private RoleService roleService;
 
     @Override
     public Set<Role> convert(String source) {
@@ -21,13 +21,17 @@ public class StringToRoleSetConverter implements Converter<String, Set<Role>> {
             String[] roleIds = source.split(",");
             for (String roleId : roleIds) {
                 try {
-                    Long id = Long.parseLong(roleId);
+                    Long id = Long.parseLong(roleId.trim());
                     Role role = roleService.getRoleById(id);
                     if (role != null) {
                         roles.add(role);
+                    } else {
+                        // Обработка случая, если роль не найдена
+                        System.err.println("Role with ID " + id + " not found.");
                     }
                 } catch (NumberFormatException e) {
                     // Обработка ошибки, если идентификатор роли не является числом
+                    System.err.println("Invalid role ID: " + roleId);
                 }
             }
         }

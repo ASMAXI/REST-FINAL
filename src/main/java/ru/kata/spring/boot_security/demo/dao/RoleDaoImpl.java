@@ -34,4 +34,10 @@ public class RoleDaoImpl implements RoleDao {
             return null;
         }
     }
+
+    @Override
+    public Role saveRole(Role role) {
+        entityManager.persist(role);
+        return role;
+    }
 }

@@ -21,6 +21,17 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User createUser(User user) {
+        // Сохраняем роли, если они новые
+        Set<Role> rolesToSave = new HashSet<>();
+        for (Role role : user.getRoles()) {
+            if (role.getId() == null) {
+                // Если у роли нет ID, значит она новая и ее нужно сохранить
+                entityManager.persist(role);
+            }
+            rolesToSave.add(role);
+        }
+        user.setRoles(rolesToSave);
+
         entityManager.persist(user);
         return user;
     }

@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
                 rolesToSave.add(existingRole);
             } else {
                 // Если роли нет в базе данных, создаем новую
-                rolesToSave.add(roleDao.findRoleByName(role.getName()));
+                rolesToSave.add(roleDao.saveRole(role));
             }
         }
         user.setRoles(rolesToSave);
@@ -61,6 +61,8 @@ public class UserServiceImpl implements UserService {
 
         return createdUser;
     }
+
+
 
     @Override
     @Transactional
