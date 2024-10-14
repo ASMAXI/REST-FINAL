@@ -2,40 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Info</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current User Information</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .centered-content {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .user-info-block {
+        .top-bar {
             background-color: #343a40;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
+            color: white;
+            padding: 10px 20px;
             margin-bottom: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .top-bar .role {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .top-bar .email {
+            font-size: 1em;
         }
     </style>
 </head>
 <body>
-<div class="centered-content">
-    <div class="user-info-block">
-        <h1 class="text-center mb-4">User Info</h1>
-        <p><strong>ID:</strong> <span th:text="${user.id}"></span></p>
-        <p><strong>Name:</strong> <span th:text="${user.name}"></span></p>
-        <p><strong>Last Name:</strong> <span th:text="${user.last_name}"></span></p>
-        <p><strong>Age:</strong> <span th:text="${user.age}"></span></p>
-        <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
-        <p><strong>Roles:</strong> <span th:text="${user.roles.stream().map(role -> role.name).collect(Collectors.joining(', '))}"></span></p>
+<div class="top-bar">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <span class="role" id="user-role"></span>
+            <span class="email" id="user-email"></span>
+        </div>
+        <button id="logout-btn" class="btn btn-outline-light">Logout</button>
     </div>
 </div>
+
+<div class="container mt-5">
+    <h1 class="text-center">Current User Information</h1>
+    <div id="user-info" class="mt-4">
+        <!-- User information will be displayed here -->
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+    $(document).ready(function() {
+
+        $.ajax({
+            url: '/api/user/current-user',
+            method: 'GET',
+            success: function(data) {
+                // Парсим JSON
+                var user = data;
+
+                $('#user-role').text(user.roles.map(role => role.name).join(', '));
+                $('#user-email').text(user.email);
+// Создаем HTML и выводим всё это
+                var userInfoHtml = `
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-text"><strong>Name:</strong> ${user.name}</p>
+                                <p class="card-text"><strong>Last name:</strong> ${user.last_name}</p>
+                                <p class="card-text"><strong>Email:</strong> ${user.email}</p>
+                                <p class="card-text"><strong>Age:</strong> ${user.age}</p>
+                                <p class="card-text"><strong>Role:</strong> ${user.roles.map(role => role.name).join(', ')}</p>
+                            </div>
+                        </div>
+                    `;
+// Вставляем инфу с user-info
+                $('#user-info').html(userInfoHtml);
+            },
+            error: function() {
+                $('#user-info').html('<p class="text-danger">Failed to load user information.</p>');
+            }
+        });
+
+        $('#logout-btn').click(function() {
+            window.location.href = '/logout';
+        });
+    });
+</script>
 </body>
 </html>
