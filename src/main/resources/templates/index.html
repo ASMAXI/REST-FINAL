@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Admin Panel</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -35,19 +36,64 @@
             width: 200px;
             height: 100vh;
             position: fixed;
-            top: 0;
+            top: 60px; /* Добавляем отступ сверху */
             left: 0;
         }
         .content {
             margin-left: 220px;
             padding: 20px;
         }
+        .top-bar {
+            background-color: #343a40;
+            color: #fff;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000; /* Устанавливаем z-index, чтобы блок был поверх других элементов */
+        }
+        .top-bar .logout-btn {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .top-bar .logout-btn:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        .top-bar .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .top-bar .user-info p {
+            margin: 0 10px;
+        }
+        .sidebar-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
+<div class="top-bar">
+    <div class="user-info">
+        <p id="currentUserEmail" class="animate__animated"></p>
+        <p id="currentUserRole" class="animate__animated"></p>
+    </div>
+    <button id="logout-btn" class="btn btn-sm logout-btn animate__animated">Logout</button>
+</div>
 <div class="sidebar">
-    <button class="btn btn-block btn-primary" id="adminButton">ADMIN</button>
-    <button class="btn btn-block btn-secondary" id="userButton">USER</button>
+    <div class="sidebar-buttons animate__animated">
+        <button class="btn btn-block btn-primary" id="adminButton">ADMIN</button>
+        <button class="btn btn-block btn-secondary" id="userButton">USER</button>
+    </div>
 </div>
 <div class="content">
     <div class="user-info-block">
@@ -55,7 +101,7 @@
         <p id="currentUserRole"></p>
     </div>
     <div id="adminPanel" style="display: none;">
-        <h1 class="text-center mb-4">Admin Panel</h1>
+        <h1 class="text-center mb-4 animate__animated animate__bounce">Admin Panel</h1>
         <ul class="nav nav-tabs" id="adminTabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" id="usersTab" data-toggle="tab" href="#users" role="tab" aria-controls="users" aria-selected="true">Users</a>
@@ -127,7 +173,7 @@
         </div>
     </div>
     <div id="userPanel" style="display: none;">
-        <h1 class="text-center mb-4">User Info</h1>
+        <h1 class="text-center mb-4 animate__animated animate__bounce">User Info</h1>
         <div class="row">
             <div class="col-md-12">
                 <h2 class="text-center">Your Information</h2>
@@ -228,8 +274,19 @@
                 return response.json();
             })
             .then(user => {
-                document.getElementById('currentUserEmail').textContent = `Email: ${user.email}`;
-                document.getElementById('currentUserRole').textContent = `Role: ${user.roles.map(role => role.name).join(', ')}`;
+                const emailElement = document.getElementById('currentUserEmail');
+                const roleElement = document.getElementById('currentUserRole');
+                const logoutBtn = document.getElementById('logout-btn');
+                const sidebarButtons = document.querySelector('.sidebar-buttons');
+
+                emailElement.textContent = `Email: ${user.email}`;
+                roleElement.textContent = `Role: ${user.roles.map(role => role.name).join(', ')}`;
+
+                // Add animation classes
+                emailElement.classList.add('animate__fadeInLeft');
+                roleElement.classList.add('animate__fadeInRight');
+                logoutBtn.classList.add('animate__fadeIn');
+                sidebarButtons.classList.add('animate__fadeInUp');
 
                 // Check if the user has admin role
                 const isAdmin = user.roles.some(role => role.name === 'ROLE_ADMIN');
@@ -454,7 +511,11 @@
         // Load roles when the page loads
         loadRoles();
 
-
+        // Logout button click handler
+        document.getElementById('logout-btn').addEventListener('click', function () {
+            // Redirect to the logout endpoint
+            window.location.href = '/logout';
+        });
     });
 </script>
 </body>
